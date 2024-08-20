@@ -254,7 +254,7 @@ class DShotRMT
     //function now returns its fail state to the caller
 
     //peeks into the queue and gets the response from the ESC
-    dshot_erpm_exit_mode_t get_dshot_packet(uint16_t* value, extended_telem_type_t* packetType = NULL);
+    dshot_erpm_exit_mode_t get_dshot_packet(uint32_t* value, extended_telem_type_t* packetType = NULL);
     
     //converts a dshot packet into an equivalent voltage (as specified by dshot specs)
     float convert_packet_to_volts(uint8_t value);

@@ -15,7 +15,7 @@ const auto MOTOR02_PIN = 18;
 const auto DSHOT_MODE = DSHOT300;
 
 // Define the failsafe and initial throttle values
-const auto FAILSAFE_THROTTLE = 999;
+const auto FAILSAFE_THROTTLE = 0;
 const auto INITIAL_THROTTLE = 48;
 
 #define TRIGGER_PIN 17
@@ -75,10 +75,10 @@ void loop()
 
 		if(loopCount % 10 == 0)
 		{
-			uint16_t rpm_1 = 0;
+			uint32_t rpm_1 = 0;
 			extended_telem_type_t telem = TELEM_TYPE_ERPM; //telemetry argument is optional
 			int error_a = anESC.get_dshot_packet(&rpm_1, &telem);
-			uint16_t rpm_2 = 0;
+			uint32_t rpm_2 = 0;
 			int error_b = anotherESC.get_dshot_packet(&rpm_2);
 
 
@@ -103,3 +103,4 @@ void loop()
 	//++loopCount;
 
 }
+

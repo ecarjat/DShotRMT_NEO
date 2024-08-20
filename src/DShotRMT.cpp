@@ -391,7 +391,7 @@ uint32_t DShotRMT::erpmToRpm(uint16_t erpm, uint16_t motorPoleCount)
 }
 
 //read back the value in the buffer
-dshot_erpm_exit_mode_t DShotRMT::get_dshot_packet(uint16_t* value, extended_telem_type_t* packetType)
+dshot_erpm_exit_mode_t DShotRMT::get_dshot_packet(uint32_t* value, extended_telem_type_t* packetType)
 {
 
 	if(dshot_config.bidirectional != ENABLE_BIDIRECTION)
@@ -570,7 +570,7 @@ float DShotRMT::convert_packet_to_volts(uint8_t value)
 //return the percent of the dshot RPM requests that succeeded
 float DShotRMT::get_telem_success_rate()
 {
-	return (float)successful_packets / (float)(error_packets + successful_packets);
+	return (error_packets && successful_packets) ? (float)successful_packets / (float)(error_packets + successful_packets) : 0.0;
 }
 
 
