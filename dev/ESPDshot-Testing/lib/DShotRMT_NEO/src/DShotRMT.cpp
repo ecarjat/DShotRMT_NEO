@@ -41,11 +41,13 @@ static bool rx_done_callback(rmt_channel_handle_t channel, const rmt_rx_done_eve
 	//	Serial.printf("%d,%d|%d,%d\n",edata->received_symbols[i].duration0,edata->received_symbols[i].level0,
 	//			edata->received_symbols[i].duration1,edata->received_symbols[i].level1);
 
+	//we're getting a packet back whose last symbol does not end in the terminating value (which is a symbol with 0 length values)
 	size_t last_sym = edata->num_symbols - 1;
 	if(edata->received_symbols[last_sym].duration0 != 0
 		&& edata->received_symbols[last_sym].duration1 != 0)
 	{
-		Serial.printf("~\n");
+		//this results in a guru meditation error, but we shouldn't be getting these anyway... I wonder what the packet looks like...
+		//Serial.printf("~\n");
 		//out_data.non_termination = true;
 	}
 
@@ -318,7 +320,7 @@ void DShotRMT::begin(dshot_mode_t dshot_mode, bidirectional_mode_t is_bidirectio
 }
 
 //encode and send a throttle value
-void DShotRMT::send_dshot_value(uint16_t throttle_value, bool get_onewire_telemetry, telemetric_request_t telemetric_request)
+dshot_send_packet_exit_mode_t DShotRMT::send_dshot_value(uint16_t throttle_value, bool get_onewire_telemetry, telemetric_request_t telemetric_request)
 {
 	dshot_esc_frame_t dshot_frame = {};
 
@@ -345,9 +347,22 @@ void DShotRMT::send_dshot_value(uint16_t throttle_value, bool get_onewire_teleme
 	//shut down the rmt reciever before we send a packet out to protect against self-sniffing
 	//this is what's used low-level, but rmt_rx_disable should be good enough for our needs
 	//rmt_ll_rx_enable((rmt_dev_t*)hal->regs, dshot_config.rx_chan.channel_id, false); //ALTER (cast)
-	if(dshot_config.bidirectional == ENABLE_BIDIRECTION)
-		handle_error(rmt_disable(dshot_config.rx_chan));
-	//run this in the tx_done callback
+	
+	if(dshot_config.bidirectional == ENABLE_BIDIRECTION) {
+		esp_err_t err = rmt_disable(dshot_config.rx_chan);
+		switch(err) {
+			case ESP_OK: {
+				break;
+			}
+			default: {
+				handle_error(err);
+				return ERR_RMT_DISABLE_FAILURE; //don't try to send out the RMT signal if we get an error
+			}
+		}
+	}
+
+	
+	//we run this in the tx_done callback
 	//handle_error(rmt_enable(dshot_config.rx_chan));
 
 
@@ -358,6 +373,7 @@ void DShotRMT::send_dshot_value(uint16_t throttle_value, bool get_onewire_teleme
 				sizeof(rmt_symbol_word_t) * DSHOT_PACKET_LENGTH,
 				&tx_config);
 
+	return SEND_SUCCESS;
 
 }
 
@@ -391,7 +407,7 @@ uint32_t DShotRMT::erpmToRpm(uint16_t erpm, uint16_t motorPoleCount)
 }
 
 //read back the value in the buffer
-dshot_erpm_exit_mode_t DShotRMT::get_dshot_packet(uint16_t* value, extended_telem_type_t* packetType)
+dshot_get_packet_exit_mode_t DShotRMT::get_dshot_packet(uint32_t* value, extended_telem_type_t* packetType)
 {
 
 	if(dshot_config.bidirectional != ENABLE_BIDIRECTION)
@@ -570,7 +586,7 @@ float DShotRMT::convert_packet_to_volts(uint8_t value)
 //return the percent of the dshot RPM requests that succeeded
 float DShotRMT::get_telem_success_rate()
 {
-	return (float)successful_packets / (float)(error_packets + successful_packets);
+	return (error_packets && successful_packets) ? (float)successful_packets / (float)(error_packets + successful_packets) : 0.0;
 }
 
 

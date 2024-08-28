@@ -104,15 +104,20 @@ typedef enum dshot_mode_e
 } dshot_mode_t;
 
 //return states of the RPM getting function
-typedef enum dshot_erpm_exit_mode_e
+typedef enum dshot_get_packet_exit_mode_e
 {
     DECODE_SUCCESS = 0,
     ERR_EMPTY_QUEUE,
     ERR_NO_PACKETS,
     ERR_CHECKSUM_FAIL,
     ERR_BIDIRECTION_DISABLED,
+} dshot_get_packet_exit_mode_t;
 
-} dshot_erpm_exit_mode_t;
+typedef enum dshot_send_packet_exit_mode_e
+{
+    SEND_SUCCESS = 0,
+    ERR_RMT_DISABLE_FAILURE,
+} dshot_send_packet_exit_mode_t;
 
 //types of data that can come back from the ESC that is not erpm
 typedef enum extended_telem_type_e
@@ -248,13 +253,13 @@ class DShotRMT
 
     //interface commands (with safe defaults)
 	void begin(dshot_mode_t dshot_mode = DSHOT_OFF, bidirectional_mode_t is_bidirectional = NO_BIDIRECTION, uint16_t magnet_count = 14);
-	void send_dshot_value(uint16_t throttle_value, bool get_onewire_telemetry = true, telemetric_request_t telemetric_request = NO_TELEMETRIC);
+	dshot_send_packet_exit_mode_t send_dshot_value(uint16_t throttle_value, bool get_onewire_telemetry = true, telemetric_request_t telemetric_request = NO_TELEMETRIC);
     
     //uint16_t get_dshot_RPM();
     //function now returns its fail state to the caller
 
     //peeks into the queue and gets the response from the ESC
-    dshot_erpm_exit_mode_t get_dshot_packet(uint16_t* value, extended_telem_type_t* packetType = NULL);
+    dshot_get_packet_exit_mode_t get_dshot_packet(uint32_t* value, extended_telem_type_t* packetType = NULL);
     
     //converts a dshot packet into an equivalent voltage (as specified by dshot specs)
     float convert_packet_to_volts(uint8_t value);
