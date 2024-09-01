@@ -1,6 +1,6 @@
 {
   "name": "DShot-rmt-NEO",
-  "version": "0.4.2a",
+  "version": "4.2.0",
   "description": "DShot implementation using newer espidf rmt libraries (with bidirection!)",
   "keywords": "dshot, rmt, esc, esp32, bldc",
   "authors":
