@@ -1,8 +1,8 @@
 {
   "name": "DShot-rmt-NEO",
-  "version": "0.4.1",
-  "description": "DShot implementation using newer espidf rmt libraries",
-  "keywords": "dshot, rmt, esc",
+  "version": "0.4.2",
+  "description": "DShot implementation using newer espidf rmt libraries (with bidirection!)",
+  "keywords": "dshot, rmt, esc, esp32, bldc",
   "authors":
   [
     {
@@ -16,10 +16,15 @@
       "maintainer": false
     }
   ],
+  "repository":
+  {
+    "type": "git",
+	  "url": "https://github.com/DrGlaucous/DShotRMT_NEO.git"
+  },
   "dependencies":
   {
     "external-repo": "https://github.com/DrGlaucous/esp-rmt-NEO.git"
   },
-  "frameworks": "arduino",
+  "frameworks": "arduino, espidf",
   "platforms": "espressif32"
 }
