@@ -3,12 +3,12 @@
 ### What is this fork?
 This fork updates the existing ESP-RMT library made by derdoktor667 to use the newer espidf RMT libraries. It adds **working Bidirectional Dshot Support** to the library.
 
-### Useage
+### Usage
 
 
 To send out motor signals, first initialize a DShotRMT object with the pin number the ESC will be attached to.
 
-Most pins can be used with the RMT module. [This thread](https://esp32.com/viewtopic.php?t=26659) outlines the perepheral pretty well.
+Most pins can be used with the RMT module. [This thread](https://esp32.com/viewtopic.php?t=26659) outlines the peripheral pretty well.
 Note that [other pin restrictions](https://randomnerdtutorials.com/esp32-pinout-reference-gpios/) still apply.
 
 ```
@@ -18,7 +18,7 @@ Once the object has been created, install the RMT settings with the following:
 ```
 anESC.begin(DSHOT_MODE, ENABLE_BIDIRECTION, 14);
 ```
-Look at `DShotRMT.h` for a description of the arguments and avalable enums that can be used to initialize the object.
+Look at `DShotRMT.h` for a description of the arguments and available enums that can be used to initialize the object.
 
 To send packets to to the ESC once it's been initialized, use `send_dshot_value()`:
 ```
@@ -28,7 +28,7 @@ This function takes a 16 bit unsigned integer from `0` to `DSHOT_THROTTLE_MAX`.
 Values below `DSHOT_THROTTLE_MIN` correspond to special commands for the ESC, which enable things like extended telemetry, 3D mode, or motor beeping.
 See `DShotRMT.h` for a complete list of commands.
 
-*Note: To arm the ESC, a value of `INITIAL_THROTTLE` or `DSHOT_CMD_MOTOR_STOP` must be sent for a specified ammount of time. It varies from firmware to firmware. For example, with BlueJay, it is 300ms.*
+*Note: To arm the ESC, a value of `INITIAL_THROTTLE` or `DSHOT_CMD_MOTOR_STOP` must be sent for a specified amount of time. It varies from firmware to firmware. For example, with BlueJay, it is 300ms.*
 
 The library currently does **not** automate dshot value transmission, so `send_dshot_value()` must be run at least every 10 milliseconds *(Betaflight ESCs do it around every 2ms)*. It is recommended to set up a [freeRTOS task](https://www.freertos.org/taskandcr.html) to handle this process. This is preferred over an ISR because tasks are non-blocking. An ISR on a timer *may* work, but its blocking nature may result in undesirable behavior.
 
@@ -38,14 +38,14 @@ uint16_t rpm_1 = 0;
 extended_telem_type_t telem = TELEM_TYPE_ERPM; //telemetry argument is optional
 int error_a = anESC.get_dshot_packet(&rpm_1, &telem);
 ```
-This function returns an error if the last packet recieved was incorrect. It sets the value and packet type of the pointers fed into the argument section. If the packet type is known, the second argument is optional.
+This function returns an error if the last packet received was incorrect. It sets the value and packet type of the pointers fed into the argument section. If the packet type is known, the second argument is optional.
 Again, types are defined in `DShotRMT.h`.
 
 To see how well packets are being delivered, use `get_telem_success_rate()`.
 This returns a float percentage of the successful packets decoded by `get_dshot_packet()`.
 
 
-**Special note:** *Running `Serial.print` each time a dshot packet is sent and recieved plays havoc with the inturrupts, stopping reception partway, or not allowing it to start until the serial message is finished being transmitted. This results in a much lower reception success rate than otherwise. I have yet to find a workaround other than calling `Serial.print` less often, like, say, every 10 packets.*
+**Special note:** *Running `Serial.print` each time a dshot packet is sent and received plays havoc with the interrupts, stopping reception partway, or not allowing it to start until the serial message is finished being transmitted. This results in a much lower reception success rate than otherwise. I have yet to find a workaround other than calling `Serial.print` less often, like, say, every 10 packets.*
 
 
 Please see the dev folder sub-project for a more complete example of the library.
@@ -134,9 +134,9 @@ D0: 10 L0: 1 || D1: 0 L1: 0<\r><\n> //this one caused error
 
 potential problem note:
 xQueue ISR data passer sends a pointer to the data
-the data that the pointer is refrencing can change with another RX event
+the data that the pointer is referencing can change with another RX event
 
-since we know the max size that a recieved frame should be, we could probably copy the whole thing into the queue instead of just a pointer to the data. That way, if things change midway, we don't get weird OOB memory problems
+since we know the max size that a received frame should be, we could probably copy the whole thing into the queue instead of just a pointer to the data. That way, if things change midway, we don't get weird OOB memory problems
 
 the response packet is 21 bits long
 each bit is either HIGH or LOW
@@ -157,7 +157,7 @@ pin 18 has a success rate of 63.2 % (in spot 2)
 (adding these averages together makes around 100%?) Is this a coincidence?
 
 when switching these spots, the success rates for each pin stayed the same.
-Even though the RMT for one pin was initialized before the other, there must be some set precidence for the backend
+Even though the RMT for one pin was initialized before the other, there must be some set precedence for the backend
 
 23 in spot 2 had a lower success than 18 in spot 1
 spot 1 had a success of 60.8 % (18)
@@ -184,7 +184,7 @@ This is followed immediately by a reception error of 2 (no packet in queue, rx_d
 
 
 Changing the queue type to use a statically allocated array of rmt symbols has increased the success rate to 99% for all channels (removed channel "bias"). 
-I still have problems with too frequent reads though. I think the problem is that when I go to read, I get inturrupted by an rx event, so the data I get in gets cut off.
+I still have problems with too frequent reads though. I think the problem is that when I go to read, I get interrupted by an rx event, so the data I get in gets cut off.
 
 Is the RX event cutting off the read event, or is the read event cutting off the RX event?
 
