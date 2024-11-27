@@ -23,7 +23,6 @@
   },
   "dependencies":
   {
-    "external-repo": "https://github.com/DrGlaucous/esp-rmt-NEO.git"
   },
   "frameworks": "arduino, espidf",
   "platforms": "espressif32"
